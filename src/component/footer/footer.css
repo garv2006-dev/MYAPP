@@ -1,0 +1,55 @@
+/* Footer Styles */
+.footer {
+  background-color: #111827; /* bg-gray-900 */
+  color: #d1d5db; /* text-gray-300 */
+  padding: 1rem 0; /* py-4 */
+  margin-top: 2.5rem; /* mt-10 */
+  width: 100%;
+}
+
+/* Footer Container */
+.footer-container {
+  max-width: 80rem; /* max-w-7xl equivalent */
+  margin: 0 auto; /* mx-auto */
+  text-align: center; /* text-center */
+  padding: 0 1rem; /* px-4 */
+}
+
+/* Footer Text */
+.footer-text {
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.5;
+}
+
+/* App Name Span */
+.app-name {
+  color: #60a5fa; /* text-blue-400 */
+  font-weight: 600; /* font-semibold */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footer {
+    padding: 0.75rem 0;
+    margin-top: 2rem;
+  }
+  
+  .footer-container {
+    padding: 0 0.75rem;
+  }
+  
+  .footer-text {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 0.5rem 0;
+    margin-top: 1.5rem;
+  }
+  
+  .footer-text {
+    font-size: 0.75rem;
+  }
+}
