@@ -7,6 +7,8 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 const provider = new GoogleAuthProvider();
+provider.addScope('profile');
+provider.addScope('email');
 export const signUpWithEmailAndPassword = (email, password) => {
     return createUserWithEmailAndPassword(auth, email, password);
 };

@@ -1,0 +1,261 @@
+/* ================================
+   Create News Page Layout
+================================ */
+.create-news-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 25px;
+    font-family: "Inter", sans-serif;
+    color: #222;
+}
+
+/* ================================
+   Header
+================================ */
+.create-news-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.create-news-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.back-button {
+    padding: 8px 16px;
+    background: #eee;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.25s;
+}
+
+.back-button:hover {
+    background: #ddd;
+}
+
+/* ================================
+   Alerts
+================================ */
+.error-message,
+.success-message {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.error-message {
+    background: #ffe0e0;
+    border: 1px solid #ff6b6b;
+    color: #c53030;
+}
+
+.success-message {
+    background: #e0ffe8;
+    border: 1px solid #32d17c;
+    color: #1c8a50;
+}
+
+/* ================================
+   Form Styling
+================================ */
+.create-news-form-container {
+    background: #fafafa;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    margin-bottom: 40px;
+}
+
+.create-news-form .form-group {
+    margin-bottom: 18px;
+}
+
+.create-news-form label {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.create-news-form input,
+.create-news-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    transition: border 0.2s;
+}
+
+.create-news-form input:focus,
+.create-news-form textarea:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* ================================
+   Buttons
+================================ */
+.submit-button,
+.cancel-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.submit-button {
+    background: #007bff;
+    color: white;
+}
+
+.submit-button:hover {
+    background: #005ec4;
+}
+
+.submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    background: #ddd;
+    margin-left: 10px;
+}
+
+.cancel-btn:hover {
+    background: #c9c9c9;
+}
+
+/* ================================
+   Existing News Section
+================================ */
+.existing-news-section h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.loading,
+.no-news {
+    padding: 20px;
+    text-align: center;
+    font-size: 16px;
+}
+
+/* ================================
+   News Grid
+================================ */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 22px;
+    margin-top: 15px;
+}
+
+/* ================================
+   News Card
+================================ */
+.news-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: 0.25s ease;
+}
+
+.news-card:hover {
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.news-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+/* Content */
+.news-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.news-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.news-description {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.news-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #777;
+    margin-top: auto;
+}
+
+/* Buttons */
+.news-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.edit-btn,
+.delete-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    transition: 0.25s;
+}
+
+.edit-btn {
+    background: #ffca28;
+}
+
+.edit-btn:hover {
+    background: #e0b020;
+}
+
+.delete-btn {
+    background: #ff5252;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #e04040;
+}
+
+/* ================================
+   Responsive
+================================ */
+@media (max-width: 768px) {
+    .create-news-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .news-image {
+        height: 150px;
+    }
+}

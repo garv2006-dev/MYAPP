@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/Authcontext";
 import { signInWithEmail, signUpWithGoogle } from "../../utils/auth";
 import { toast } from "react-toastify";
@@ -11,6 +11,13 @@ export default function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Redirect authenticated users to home
+  useEffect(() => {
+    if (islogedIn) {
+      navigate("/", { replace: true });
+    }
+  }, [islogedIn, navigate]);
 
   const {
     register,
