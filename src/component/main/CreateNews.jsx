@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/Authcontext";
-import { db, storage } from "../../utils/firebase";
+import { db } from "../../utils/firebase";
 import {
     collection,
     addDoc,
@@ -14,8 +14,10 @@ import {
     updateDoc,
     getDoc
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "../style/createnews.css";
+
+// ⬇️ Cloudinary Upload Helper
+import { uploadToCloudinary } from "../../utils/cloudinaryUpload";
 
 export default function CreateNews() {
     const navigate = useNavigate();
@@ -49,9 +51,7 @@ export default function CreateNews() {
         fetchExistingNews();
     }, [user]);
 
-    // ------------------------------------------------------
     // Fetch logged-in user profile
-    // ------------------------------------------------------
     const fetchUserProfile = async () => {
         try {
             const docRef = doc(db, "users", user.uid);
@@ -61,7 +61,8 @@ export default function CreateNews() {
                 const u = userDoc.data();
                 setFormData((prev) => ({
                     ...prev,
-                    author: `${u.firstName || ""} ${u.lastName || ""}`.trim() ||
+                    author:
+                        `${u.firstName || ""} ${u.lastName || ""}`.trim() ||
                         user.displayName ||
                         user.email
                 }));
@@ -72,7 +73,6 @@ export default function CreateNews() {
                 }));
             }
         } catch (error) {
-            console.error(error);
             setFormData((prev) => ({
                 ...prev,
                 author: user.displayName || user.email
@@ -80,9 +80,7 @@ export default function CreateNews() {
         }
     };
 
-    // ------------------------------------------------------
-    // Fetch news created by all users (you filter later)
-    // ------------------------------------------------------
+    // Fetch all user news
     const fetchExistingNews = async () => {
         try {
             setFetchLoading(true);
@@ -101,24 +99,19 @@ export default function CreateNews() {
                 }))
             );
         } catch (error) {
-            console.error("Fetch error:", error);
             setError(error.message);
         } finally {
             setFetchLoading(false);
         }
     };
 
-    // ------------------------------------------------------
-    // Handle form input
-    // ------------------------------------------------------
+    // Input change handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // ------------------------------------------------------
-    // Image & video validation
-    // ------------------------------------------------------
+    // Image validation
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file && file.type.startsWith("image/")) {
@@ -129,6 +122,7 @@ export default function CreateNews() {
         }
     };
 
+    // Video validation
     const handleVideoChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -147,21 +141,13 @@ export default function CreateNews() {
         setError("");
     };
 
-    // ------------------------------------------------------
-    // Upload to Firebase Storage
-    // ------------------------------------------------------
-    const uploadFile = async (file, fileType) => {
-        if (!file) return null;
-
-        const fileRef = ref(storage, `news/${user.uid}/${Date.now()}_${file.name}`);
-
-        const snap = await uploadBytes(fileRef, file);
-        return await getDownloadURL(snap.ref);
+    // ⬇️ Replace Firebase upload with Cloudinary upload
+    const uploadFile = async (file, type) => {
+        const uploaded = await uploadToCloudinary(file, type);
+        return uploaded.secure_url; // Cloudinary returns URL
     };
 
-    // ------------------------------------------------------
-    // Create a news article
-    // ------------------------------------------------------
+    // Create News Submit Handler
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -221,9 +207,7 @@ export default function CreateNews() {
         }
     };
 
-    // ------------------------------------------------------
     // Edit News
-    // ------------------------------------------------------
     const handleEdit = (article) => {
         setIsEditing(true);
         setEditingNews(article);
@@ -235,24 +219,65 @@ export default function CreateNews() {
             urlToImage: article.urlToImage,
             url: article.url
         });
+        // Reset file inputs when editing
+        setImageFile(null);
+        setVideoFile(null);
+        setUploadProgress(0);
     };
 
+    // Update News
     const handleUpdate = async (e) => {
         e.preventDefault();
 
+        if (!formData.title.trim() || !formData.description.trim()) {
+            return setError("Title and description are required.");
+        }
+
         try {
             setLoading(true);
+            setUploadProgress(0);
+
+            let imageUrl = editingNews.urlToImage;
+            let videoUrl = editingNews.videoUrl;
+
+            // Handle image upload if new image is selected
+            if (imageFile) {
+                const imageResult = await uploadToCloudinary(imageFile, "image");
+                imageUrl = imageResult.secure_url;
+                setUploadProgress(50);
+            }
+
+            // Handle video upload if new video is selected
+            if (videoFile) {
+                const videoResult = await uploadToCloudinary(videoFile, "video");
+                videoUrl = videoResult.secure_url;
+                setUploadProgress(100);
+            }
 
             const refDoc = doc(db, "news", editingNews.id);
 
             await updateDoc(refDoc, {
                 ...formData,
+                urlToImage: imageUrl,
+                videoUrl: videoUrl,
                 updatedAt: serverTimestamp()
             });
 
             setIsEditing(false);
             setEditingNews(null);
+            setImageFile(null);
+            setVideoFile(null);
+            setFormData({
+                title: "",
+                description: "",
+                content: "",
+                author: "",
+                urlToImage: "",
+                url: ""
+            });
             fetchExistingNews();
+            setSuccess(true);
+            setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -260,9 +285,7 @@ export default function CreateNews() {
         }
     };
 
-    // ------------------------------------------------------
     // Delete News
-    // ------------------------------------------------------
     const handleDelete = async (id) => {
         if (!window.confirm("Delete this article?")) return;
 
@@ -274,9 +297,7 @@ export default function CreateNews() {
         }
     };
 
-    // ------------------------------------------------------
-    // UI Starts Here
-    // ------------------------------------------------------
+    // UI
     return (
         <div className="create-news-container">
             <div className="create-news-header">
@@ -290,25 +311,47 @@ export default function CreateNews() {
             {success && <div className="success-message">News created!</div>}
 
             <div className="create-news-form-container">
-                <form onSubmit={isEditing ? handleUpdate : handleSubmit} className="create-news-form">
+                <form
+                    onSubmit={isEditing ? handleUpdate : handleSubmit}
+                    className="create-news-form"
+                >
                     <div className="form-group">
                         <label>Title *</label>
-                        <input name="title" value={formData.title} onChange={handleInputChange} required />
+                        <input
+                            name="title"
+                            value={formData.title}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                     <div className="form-group">
                         <label>Description *</label>
-                        <textarea name="description" value={formData.description} onChange={handleInputChange} required />
+                        <textarea
+                            name="description"
+                            value={formData.description}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
 
                     <div className="form-group">
                         <label>Content</label>
-                        <textarea name="content" value={formData.content} onChange={handleInputChange} rows="6" />
+                        <textarea
+                            name="content"
+                            value={formData.content}
+                            onChange={handleInputChange}
+                            rows="6"
+                        />
                     </div>
 
                     <div className="form-group">
                         <label>Author</label>
-                        <input name="author" value={formData.author} onChange={handleInputChange} />
+                        <input
+                            name="author"
+                            value={formData.author}
+                            onChange={handleInputChange}
+                        />
                     </div>
 
                     <div className="form-group">
@@ -325,16 +368,27 @@ export default function CreateNews() {
 
                     {uploadProgress > 0 && (
                         <div className="progress-bar">
-                            <div style={{ width: `${uploadProgress}%` }} className="progress-fill"></div>
+                            <div
+                                style={{ width: `${uploadProgress}%` }}
+                                className="progress-fill"
+                            ></div>
                         </div>
                     )}
 
                     <button className="submit-button" disabled={loading}>
-                        {loading ? "Please wait..." : isEditing ? "Update Article" : "Create Article"}
+                        {loading
+                            ? "Please wait..."
+                            : isEditing
+                            ? "Update Article"
+                            : "Create Article"}
                     </button>
 
                     {isEditing && (
-                        <button type="button" onClick={() => setIsEditing(false)} className="cancel-btn">
+                        <button
+                            type="button"
+                            onClick={() => setIsEditing(false)}
+                            className="cancel-btn"
+                        >
                             Cancel
                         </button>
                     )}
@@ -352,13 +406,30 @@ export default function CreateNews() {
                             .filter((n) => n.userId === user?.uid)
                             .map((article) => (
                                 <div className="news-card" key={article.id}>
-                                    {article.urlToImage && <img src={article.urlToImage} alt="" className="news-image" />}
+                                    {article.urlToImage && (
+                                        <img
+                                            src={article.urlToImage}
+                                            alt=""
+                                            className="news-image"
+                                        />
+                                    )}
+
+                                    {article.videoUrl && (
+                                        <video
+                                            className="news-video"
+                                            src={article.videoUrl}
+                                            controls
+                                        ></video>
+                                    )}
+                                                
                                     <h3>{article.title}</h3>
                                     <p>{article.description}</p>
 
                                     <div className="news-actions">
-                                        <button onClick={() => handleEdit(article)}>Edit</button>
-                                        <button onClick={() => handleDelete(article.id)}>Delete</button>
+                                        <button onClick={() => handleEdit(article)} className="edit-btn">Edit</button>
+                                        <button onClick={() => handleDelete(article.id)} className="delete-btn">
+                                            Delete
+                                        </button>
                                     </div>
                                 </div>
                             ))}

@@ -6,3 +6,6 @@
 body{
     font-family: 'Poppins', sans-serif;
 }
+.h-screen{
+    height: 100vh;
+}

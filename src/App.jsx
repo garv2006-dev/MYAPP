@@ -11,12 +11,17 @@ import CreateNews from "./component/main/CreateNews";
 import ProtectedRoute from "./component/auth/ProtectedRoute";
 import Setting from "./component/main/Setting";
 import UserProfile from "./component/main/UserProfile";
+import Read from "./component/main/Read";
 import "./App.css";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Cloudinary } from '@cloudinary/url-gen';
+import { auto } from '@cloudinary/url-gen/actions/resize';
+import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';
+import { AdvancedImage } from '@cloudinary/react';
 const Layout = () => {
   return (
     <div className="">
@@ -41,6 +46,10 @@ const router = createBrowserRouter([
   {
     path: "/forgetpassword",
     element: <Forgetpassword />,
+  },
+  {
+    path: "/read/:id",
+    element: <Read />,
   },
   {
     path: "/",
@@ -77,7 +86,8 @@ const router = createBrowserRouter([
       {
         path: "/userprofile",
         element: <UserProfile />,
-      }
+      },
+
     ],
   },
 ]);
@@ -85,11 +95,17 @@ const router = createBrowserRouter([
 
 const queryClient = new QueryClient();
 function App() {
+  const cld = new Cloudinary({ cloud: { cloudName: 'dnnx2sedu' } });
+  // const img = cld
+  //   .image('')
+  //   .format('auto') // Optimize delivery by resizing and applying auto-format and auto-quality// cldImg={img}
+  //   .quality('auto')
+  //   .resize(auto().gravity(autoGravity()).width(500).height(500)); // Transform the image: auto-crop to square aspect_ratio
   return (
     <QueryClientProvider client={queryClient}>
-     
+      {/* <AdvancedImage  />    */}
       <RouterProvider router={router} />
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}

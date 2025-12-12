@@ -9,7 +9,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="hero-section">
         <h1 className="hero-title">
-          Welcome to Our Website
+          Welcome to News Website
         </h1>
 
         <p className="hero-subtitle">
